@@ -10,12 +10,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SmsWebSender.Models;
-using SmsWebSender.Services;
 
 namespace SmsWebSender
 {
     public class Startup
     {
+        private bool _isDevelopment = false;
+
         public Startup(IHostingEnvironment env)
         {
             // Set up configuration sources.
@@ -26,6 +27,7 @@ namespace SmsWebSender
             if (env.IsDevelopment())
             {
                 // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
+                _isDevelopment = true;
                 builder.AddUserSecrets();
             }
 
@@ -38,25 +40,40 @@ namespace SmsWebSender
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connectionString = "";
+            if (_isDevelopment)
+            {
+                connectionString = Configuration["Data:DefaultConnection:SmsSenderDebugConnectionString"];
+            }
+            else
+            {
+                connectionString = Configuration["Data:DefaultConnection:SmsSenderProductionConnectionString"];
+            }
+
             // Add framework services.
             services.AddEntityFramework()
                 .AddSqlServer()
                 .AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(Configuration["Data:DefaultConnection:ConnectionString"]));
+                    options.UseSqlServer(connectionString));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>(o =>
+                {
+                    o.Password.RequireDigit = false;
+                    o.Password.RequireLowercase = false;
+                    o.Password.RequireNonLetterOrDigit = false;
+                    o.Password.RequireUppercase = false;
+                    o.Password.RequiredLength = 6;
+                    o.Cookies.ApplicationCookie.LoginPath = "/Account/Login";
+                })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
 
-            // Add application services.
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -96,8 +113,10 @@ namespace SmsWebSender
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Account}/{action=Login}/{id?}");
             });
+
+            await InitialData.InitializeUser(app.ApplicationServices, Configuration["defaultUserPassword"]);
         }
 
         // Entry point for the application.

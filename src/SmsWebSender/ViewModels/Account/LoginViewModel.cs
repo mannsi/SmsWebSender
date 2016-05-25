@@ -8,15 +8,15 @@ namespace SmsWebSender.ViewModels.Account
 {
     public class LoginViewModel
     {
-        [Required]
-        [EmailAddress]
+        [Required(ErrorMessage = "Verður að fylla")]
+        [EmailAddress(ErrorMessage = "Ólöglegt netfang")]
+        [Display(Name="Netfang")]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Verður að fylla")]
         [DataType(DataType.Password)]
+        [Display(Name="Lykilorð")]
         public string Password { get; set; }
 
-        [Display(Name = "Remember me?")]
-        public bool RememberMe { get; set; }
     }
 }
