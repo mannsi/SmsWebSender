@@ -1,2 +1,45 @@
-﻿@model SmsWebSender.ViewModels.Sms.SmsViewModel
-
+﻿@section Scripts{
+    <script src="~/lib/angular/angular.min.js"></script>
+    <script src="~/js/app-sms.js"></script>
+    <script src="~/js/smsController.js"></script>
+}
+<div ng-app="app-sms" ng-controller="smsController as vm">
+    <div class="row">
+        <button class="btn btn-info" ng-click="vm.fetchToday()">Sækja í dag</button>
+        <button class="btn btn-info" ng-click="vm.fetchTomorrow()">Sækja á morgun</button>
+        <span ng-show="vm.isFetching"><i class="fa fa-spinner fa-spin"></i> Næ í gögn</span>
+        
+    </div>
+    
+    <div class="text-danger text-center" ng-show="vm.errorMessage">{{vm.errorMessage}}</div>
+    <div class="row">
+        <div>
+            <table class="table table-striped table-hover">
+                <thead>
+                <tr class="text-center">
+                    <td class="col-sm-2 text-left">Nafn</td>
+                    <td class="col-sm-2 text-left">Númer</td>
+                    <td class="col-sm-1">Kl</td>
+                    <td class="col-sm-5">Texti</td>
+                    <td class="text-right col-sm-1">Á að senda</td>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="text-center" ng-repeat="recipient in vm.recipients">
+                    <td class="col-sm-2 text-left">{{recipient.Name}}</td>
+                    <td class="col-sm-2"><input class="form-control" type="text" ng-model="recipient.Number"/></td>
+                    <td class="col-sm-1">{{recipient.AppointmentStartTime | date:'HH:mm'}}</td>
+                    <td class="col-sm-5"><textarea class="form-control" row="5" style="width: 100%;" ng-model="recipient.SmsText"></textarea></td>
+                    <td class="col-sm-1 text-right"><input type="checkbox" ng-checked="recipient.ShouldBeSentTo"/></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="btn btn-success btn-sm" ng-click="vm.addRecipient()"><i class="fa fa-plus fa-lg"></i></div>
+        <button class="btn btn-success pull-right" ng-click="vm.sendSms()">Senda</button>
+    </div>
+    <div ng-show="vm.isSending" class="pull-right"><i class="fa fa-spinner fa-spin"></i> Sendi gögn</div>
+    <div class="pull-right text-success" ng-class="{fade: vm.startFade, fadeIn: vm.fadeIn}">{{vm.sendingSuccessMessage}}</div>
+</div>
