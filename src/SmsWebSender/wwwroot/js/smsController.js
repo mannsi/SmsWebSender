@@ -7,27 +7,38 @@
     function smsController($http, $timeout) {
         var vm = this;
 
-        vm.name = "mannsi";
-        vm.recipients = [];
+        vm.messageLinesBlocks = [];
+        vm.calendarEntries = new Array();
         vm.errorMessage = "";
         vm.sendingSuccessMessage = "";
         vm.isFetching = true;
         vm.isSending = false;
         vm.startFade = false;
         vm.fadeIn = false;
+        vm.senderName = "";
+        vm.allowedSenderNameRegex = '[A-Za-z0-9]+';
+
+        vm.initData =  function(senderName) {
+            vm.senderName = senderName;
+        }
+
+        function stringIsNumeric(n) {
+            return !isNaN(parseFloat(n)) && isFinite(n);
+        }
 
         function fetchFunc(date) {
+            vm.isFetching = true;
             var dateString = date.toUTCString();
             $http(
                 {
-                url:"/sms/recipients",  
-                method: 'GET',
-                params: { date: dateString }
+                    url: "/sms/messageLinesBlocks",
+                    method: 'GET',
+                    params: { date: dateString }
                 }
                 )
                 .then(function(response) {
                         // Success
-                        angular.copy(response.data, vm.recipients);
+                        angular.copy(response.data, vm.messageLinesBlocks);
                     },
                     function(error) {
                         // Failure
@@ -47,7 +58,7 @@
         vm.sendSms = function() {
             vm.isSending = true;
             vm.errorMessage = "";
-            $http.post("/sms/send", vm.recipients)
+            $http.post('/sms/send', vm.messageLinesBlocks)
                 .then(function (response) {
                     vm.fadeIn = true;
                     vm.sendingSuccessMessage = "Sending tókst !";
@@ -64,23 +75,29 @@
                     vm.isSending = false;
                 });
         }
-        vm.addRecipient = function() {
-            vm.recipients.push({
-                Name: "",
-                Number: "",
-                AppointmentStartTime: "",
-                Text: ""
-            });
-        }
+        //vm.addRecipient = function() {
+        //    vm.messageLines.push({
+        //        Name: "",
+        //        Number: "",
+        //        AppointmentStartTime: "",
+        //        Text: ""
+        //    });
+        //}
 
         vm.fetchToday = function () {
+            vm.messageLinesBlocks = [];
             var today = new Date();
             fetchFunc(today);
         };
 
         vm.fetchTomorrow = function () {
+            vm.messageLinesBlocks = [];
             var tomorrow = addDays(new Date(), 1);
             fetchFunc(tomorrow);
+        };
+
+        vm.validGsmNumber = function (numberString) {
+            return !numberString.startsWith('5') && numberString.length === 7 && stringIsNumeric(numberString);
         };
 
         vm.fetchToday();

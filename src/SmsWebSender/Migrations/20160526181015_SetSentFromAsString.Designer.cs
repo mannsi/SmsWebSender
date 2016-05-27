@@ -8,9 +8,10 @@ using SmsWebSender.Models;
 namespace SmsWebSender.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20160526181015_SetSentFromAsString")]
+    partial class SetSentFromAsString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.0-rc1-16348")
@@ -104,8 +105,6 @@ namespace SmsWebSender.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
-                    b.Property<string>("CompanyName");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -133,8 +132,6 @@ namespace SmsWebSender.Migrations
                     b.Property<string>("SecurityStamp");
 
                     b.Property<string>("SendSmsName");
-
-                    b.Property<string>("SmsTemplate");
 
                     b.Property<bool>("TwoFactorEnabled");
 

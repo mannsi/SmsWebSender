@@ -35,8 +35,14 @@ namespace SmsWebSender.Controllers
         // GET: /Account/Login
         [HttpGet]
         [AllowAnonymous]
+        [Route("")]
         public IActionResult Login(string returnUrl = null)
         {
+            if (User.IsSignedIn())
+            {
+                return RedirectToAction("Index","Sms");
+            }
+
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
@@ -78,7 +84,32 @@ namespace SmsWebSender.Controllers
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
         }
-        
+
+        [HttpGet]
+        [Authorize]
+        [Route("notandi/stillingar")]
+        public async Task<IActionResult> Settings()
+        {
+            var vm = new SettingsViewModel();
+            var user = await _userManager.FindByIdAsync(User.GetUserId());
+            vm.SendSmsName = user.SendSmsName;
+            vm.SmsTemplate = user.SmsTemplate;
+            return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [Route("notandi/stillingar")]
+        public async Task<IActionResult> Settings(SettingsViewModel vm)
+        {
+            var user = await _userManager.FindByIdAsync(User.GetUserId());
+            user.SendSmsName = vm.SendSmsName;
+            user.SmsTemplate = vm.SmsTemplate;
+            await _userManager.UpdateAsync(user);
+
+            return RedirectToAction("Index","Sms");
+        }
+
         #region Helpers
 
         private IActionResult RedirectToLocal(string returnUrl)

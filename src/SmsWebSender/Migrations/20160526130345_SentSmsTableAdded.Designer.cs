@@ -8,9 +8,10 @@ using SmsWebSender.Models;
 namespace SmsWebSender.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20160526130345_SentSmsTableAdded")]
+    partial class SentSmsTableAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.0-rc1-16348")
@@ -104,8 +105,6 @@ namespace SmsWebSender.Migrations
 
                     b.Property<int>("AccessFailedCount");
 
-                    b.Property<string>("CompanyName");
-
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
@@ -134,8 +133,6 @@ namespace SmsWebSender.Migrations
 
                     b.Property<string>("SendSmsName");
 
-                    b.Property<string>("SmsTemplate");
-
                     b.Property<bool>("TwoFactorEnabled");
 
                     b.Property<string>("UserName")
@@ -152,21 +149,19 @@ namespace SmsWebSender.Migrations
                     b.HasAnnotation("Relational:TableName", "AspNetUsers");
                 });
 
-            modelBuilder.Entity("SmsWebSender.Models.TwilioMessage", b =>
+            modelBuilder.Entity("SmsWebSender.Models.SentMessage", b =>
                 {
                     b.Property<string>("Id");
 
                     b.Property<string>("Content");
 
-                    b.Property<string>("NumberTo");
+                    b.Property<int>("NumberTo");
 
                     b.Property<string>("SendingUserId");
 
+                    b.Property<DateTime>("SentTime");
+
                     b.Property<string>("SentWithName");
-
-                    b.Property<string>("Status");
-
-                    b.Property<DateTime>("UpdateTime");
 
                     b.HasKey("Id");
                 });
@@ -203,7 +198,7 @@ namespace SmsWebSender.Migrations
                         .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("SmsWebSender.Models.TwilioMessage", b =>
+            modelBuilder.Entity("SmsWebSender.Models.SentMessage", b =>
                 {
                     b.HasOne("SmsWebSender.Models.ApplicationUser")
                         .WithMany()

@@ -10,6 +10,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SmsWebSender.Models;
+using SmsWebSender.ServiceInterfaces;
+using SmsWebSender.Services;
 
 namespace SmsWebSender
 {
@@ -35,7 +37,7 @@ namespace SmsWebSender
             Configuration = builder.Build();
         }
 
-        public IConfigurationRoot Configuration { get; set; }
+        public IConfiguration Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -69,6 +71,10 @@ namespace SmsWebSender
                 .AddDefaultTokenProviders();
 
             services.AddMvc();
+
+            services.AddSingleton(provider => Configuration);
+            services.AddTransient<IAppointmentService, AppointmentService>();
+            services.AddTransient<ISmsService, SmsService>();
 
         }
 

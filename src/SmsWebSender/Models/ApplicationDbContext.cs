@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Data.Entity;
+using Twilio;
 
 namespace SmsWebSender.Models
 {
@@ -16,5 +17,7 @@ namespace SmsWebSender.Models
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<TwilioMessage> TwilioMessages { get; set; }
     }
 }

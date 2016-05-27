@@ -1,0 +1,46 @@
+﻿@model SettingsViewModel
+
+@section Scripts{
+    <script src="~/lib/angular/angular.min.js"></script>
+    <script src="~/js/app-sms.js"></script>
+    <script src="~/js/accountSettingsController.js"></script>
+    <script>
+        $('[data-toggle="tooltip"]').tooltip()
+    </script>
+}
+
+<style>
+    textarea {
+        max-width: 580px;
+    }
+</style>
+<div class="row">
+    <h1 class="page-header">Stillingar</h1>
+</div>
+
+<div class="row" ng-app="app-sms" ng-controller="accountSettingsController as vm" ng-init="vm.initData('@Model.SendSmsName', '@Model.SmsTemplate')">
+    <form name="settingsForm" id="settingsForm" novalidate asp-controller="Account" asp-action="Settings" method="post" class="form-horizontal" role="form">
+        <div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="SendSmsName" class="col-md-2 control-label"></label>
+            <div class="col-md-10">
+                <input name="SendSmsName" id="SendSmsName" class="form-control" ng-model="vm.senderName" required ng-maxlength="11" ng-pattern="vm.allowedSenderNameRegex"/>
+                <span ng-show="settingsForm.SendSmsName.$error.required" class="text-warning">Má ekki vera tómt</span>
+                <span ng-show="settingsForm.SendSmsName.$error.maxlength" class="text-warning">11 stafir eða styttra</span>
+                <span ng-show="settingsForm.SendSmsName.$error.pattern" class="text-warning">Engir íslenskri stafir</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <span class="col-md-2 text-right"><label asp-for="SmsTemplate" class="control-label"></label> <i class="fa fa-question-circle" data-toggle="tooltip" data-html="true" data-placement="top" title="Dæmi:<br/> <em>Minnum a timann thinn {dagsetning} kl {klukkan}. Kvedja, Fyrirtaeki</em>"></i></span>
+            
+            <div class="col-md-10">
+                <textarea asp-for="SmsTemplate" class="form-control"></textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <button type="submit" class="btn btn-success" ng-disabled="settingsForm.$invalid">Uppfæra</button>
+            </div>
+        </div>
+    </form>
+</div>
