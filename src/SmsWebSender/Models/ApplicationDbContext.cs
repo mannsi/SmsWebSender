@@ -18,6 +18,5 @@ namespace SmsWebSender.Models
             // Add your customizations after calling base.OnModelCreating(builder);
         }
 
-        public DbSet<TwilioMessage> TwilioMessages { get; set; }
     }
 }

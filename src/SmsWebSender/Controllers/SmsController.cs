@@ -91,40 +91,17 @@ namespace SmsWebSender.Controllers
         public async Task<bool> Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
             var sendingUser = await _userManager.FindByIdAsync(User.GetUserId());
-            _smsService.SendSmsMessages(sendingUser.SendSmsName, IcelandicAreaCode, messageLinesBlocks);
-            //_smsService.MessageEvent += message => SmsServiceOnMessageEvent(message, sendingUser);
+
+            foreach (var block in messageLinesBlocks)
+            {
+                foreach (var messageLine in block.MessageLines.Where(line => line.ShouldBeSentTo))
+                {
+                    string to = $"+{IcelandicAreaCode}{messageLine.Number}";
+                    _smsService.SendMessage(sendingUser.SendSmsName, to, messageLine.SmsText);
+                }
+            }
 
             return true;
-        }
-
-        private void SmsServiceOnMessageEvent(Message message, ApplicationUser sendingUser)
-        {
-            var twilioMessage = _dbContext.TwilioMessages.FirstOrDefault(m => m.Id == message.Sid);
-
-            var isNew = twilioMessage == null;
-
-            if (!isNew)
-            {
-                _dbContext.Update(twilioMessage);
-            }
-
-            twilioMessage = new TwilioMessage
-            {
-                Content = message.Body,
-                Id = message.Sid,
-                NumberTo = message.To,
-                UpdateTime = message.DateUpdated,
-                SendingUser = sendingUser,
-                SentWithName = message.From,
-                Status = message.Status
-            };
-
-            if (isNew)
-            {
-                _dbContext.TwilioMessages.Add(twilioMessage);
-            }
-
-            _dbContext.SaveChanges();
         }
     }
 }

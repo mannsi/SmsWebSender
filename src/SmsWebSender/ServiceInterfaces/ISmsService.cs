@@ -15,7 +15,7 @@ namespace SmsWebSender.ServiceInterfaces
     {
         event MessageEventHandler MessageEvent;
 
-        void SendSmsMessages(string senderName, int areaCode, List<MessageLinesBlock> messageLines);
+        void SendMessage(string from, string to, string body);
         List<Message> GetMessages();
     }
 }

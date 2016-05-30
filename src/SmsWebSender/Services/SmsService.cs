@@ -19,17 +19,17 @@ namespace SmsWebSender.Services
             _configuration = configuration;
         }
 
-        public void SendSmsMessages(string senderName, int areaCode, List<MessageLinesBlock> messageLinesBlocks)
-        {
-            foreach (var block in messageLinesBlocks)
-            {
-                foreach (var messageLine in block.MessageLines)
-                {
-                    string to = $"+{areaCode}{messageLine.Number}";
-                    SendMessage(senderName, to, messageLine.SmsText);
-                }
-            }
-        }
+        //public void SendSmsMessages(string senderName, int areaCode, List<MessageLinesBlock> messageLinesBlocks)
+        //{
+        //    foreach (var block in messageLinesBlocks)
+        //    {
+        //        foreach (var messageLine in block.MessageLines.Where(line => line.ShouldBeSentTo))
+        //        {
+        //            string to = $"+{areaCode}{messageLine.Number}";
+        //            SendMessage(senderName, to, messageLine.SmsText);
+        //        }
+        //    }
+        //}
 
         public List<Message> GetMessages()
         {
@@ -41,10 +41,10 @@ namespace SmsWebSender.Services
             return twilio.ListMessages(options).Messages;
         }
 
-        private void SendMessage(string from, string to, string body)
+        public void SendMessage(string from, string to, string body)
         {
-            var twilio = GetTwilioClient();
-            //twilio.SendMessage("CatFacts", "+3547868887", "A cat has been mayor of Talkeetna, Alaska, for 15 years. His name is Stubbs.", Callback);
+            //var twilio = GetTwilioClient();
+            //twilio.SendMessage(from, to, body, Callback);
         }
 
         private void Callback(Message message)

@@ -4,12 +4,12 @@
 {
     <form asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
-            <li>
-                @*<div class="btn navbar-btn"><i class="fa fa-user"></i> @User.GetUserName()</div>*@
-                <a asp-controller="Account" asp-action="Settings"><i class="fa fa-user"></i> @User.GetUserName()</a>
-            </li>
-            <li>
-                <button type="submit" class="btn btn-link navbar-btn navbar-link"><i class="fa fa-sign-out"></i> Skrá út</button>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-user"></i> @User.GetUserName() <span class="caret"></span></a>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a asp-controller="Account" asp-action="Settings"><i class="fa fa-cog"></i> Stillingar</a></li>
+                    <li><button type="submit" class="btn btn-link navbar-btn navbar-link"><i class="fa fa-sign-out"></i> Skrá út</button></li>
+                </ul>
             </li>
         </ul>
     </form>

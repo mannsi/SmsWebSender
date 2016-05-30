@@ -37,8 +37,18 @@ namespace SmsWebSender.Services
                 var results = request.Execute().Items;
                 foreach (var result in results)
                 {
+                    string clientName = result.Summary;
                     int gsmNumber = 0;
-                    int.TryParse(result.Description, out gsmNumber);
+                    if (result.Summary.Length > 7)
+                    {
+                        clientName = result.Summary.Substring(0, result.Summary.Length - 7);
+                        var gsmNumberString = result.Summary.Substring(result.Summary.Length - 7, 7);
+                        var hasNumber = int.TryParse(gsmNumberString, out gsmNumber);
+                        if (!hasNumber)
+                        {
+                            clientName = result.Summary;
+                        }
+                    }
 
                     var startTimeOfAppointment = DateTime.MinValue;
                     if (result.Start.DateTime.HasValue)
@@ -48,7 +58,7 @@ namespace SmsWebSender.Services
 
                     appointments.Add(new Appointment
                     {
-                        ClientName = result.Summary,
+                        ClientName = clientName,
                         GsmNumber = gsmNumber,
                         StartTimeOfAppointment = startTimeOfAppointment,
                         EmployeeName = calendar.Summary,
