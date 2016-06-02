@@ -90,7 +90,6 @@ namespace SmsWebSender.Controllers
         [Route("Send")]
         public async Task<bool> Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
-            _smsService.BatchProcessingFinished += SmsServiceOnBatchProcessingFinished;
             var sendingUser = await _userManager.FindByIdAsync(User.GetUserId());
 
             var messageLinesToSend = new List<MessageLine>();

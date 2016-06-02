@@ -14,17 +14,10 @@ namespace SmsWebSender.Services
     public class SmsService : ISmsService
     {
         private readonly IConfiguration _configuration;
-        private List<string> MessagesNotProcessed { get; set; }
-        private List<Twilio.Message> ProcessedMessages { get; set; }
-        
-        public event MessagesFinishedEventHandler BatchProcessingFinished;
-        
 
         public SmsService(IConfiguration configuration)
         {
             _configuration = configuration;
-            MessagesNotProcessed = new List<string>();
-            ProcessedMessages = new List<Message>();
         }
 
         public List<Twilio.Message> GetMessages()
@@ -54,7 +47,6 @@ namespace SmsWebSender.Services
         {
             foreach (var message in messagesToSend)
             {
-                MessagesNotProcessed.Add(message.Id);
                 SendMessage(message);
             }
         }
@@ -67,9 +59,5 @@ namespace SmsWebSender.Services
             return twilio;
         }
 
-        private void AllMessagesProcessed()
-        {
-            BatchProcessingFinished?.Invoke(ProcessedMessages);
-        }
     }
 }
