@@ -14,8 +14,8 @@ namespace SmsWebSender.Models
         {
             AppointmentStartTime = appointmentStartTime;
             Number = number;
-            SmsText = smsTemplate
-                .Replace("{dagsetning}", AppointmentStartTime.ToString("dd/MM"))
+            Body = smsTemplate
+                .Replace("{dagsetning}", AppointmentStartTime.ToString("dd/MM/yyyy"))
                 .Replace("{klukkan}", AppointmentStartTime.ToString("HH:mm"));
             int dummy;
             ShouldBeSentTo = !Number.StartsWith("5") && Number.Length == 7 && int.TryParse(Number, out dummy);
@@ -27,7 +27,7 @@ namespace SmsWebSender.Models
 
         public bool ShouldBeSentTo { get; set; }
 
-        public string SmsText { get; set; }
+        public string Body { get; set; }
 
         public string CalendarId { get; set; }
     }

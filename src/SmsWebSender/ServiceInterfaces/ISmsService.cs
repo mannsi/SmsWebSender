@@ -2,20 +2,18 @@
 using System.Collections.Generic;
 using System.Data.Odbc;
 using System.Linq;
-using System.Threading.Tasks;
-using SmsWebSender.Models;
-using SmsWebSender.ViewModels.Sms;
-using Twilio;
+
 
 namespace SmsWebSender.ServiceInterfaces
 {
-    public delegate void MessageEventHandler(Message message);
+    public delegate void MessagesFinishedEventHandler(List<Twilio.Message> processedMessages);
 
     public interface ISmsService
     {
-        event MessageEventHandler MessageEvent;
+        event MessagesFinishedEventHandler BatchProcessingFinished;
 
-        void SendMessage(string from, string to, string body);
-        List<Message> GetMessages();
+        void SendMessage(Models.Message messageToSend);
+        void SendBatch(List<SmsWebSender.Models.Message> messagesToSend);
+        List<Twilio.Message> GetMessages();
     }
 }

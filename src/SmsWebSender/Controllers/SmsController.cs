@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Mvc;
+using Microsoft.Data.Entity.Metadata.Internal;
 using RestSharp;
 using SmsWebSender.Models;
 using SmsWebSender.ServiceInterfaces;
 using SmsWebSender.ViewModels.Sms;
 using Twilio;
+using Message = Twilio.Message;
 
 namespace SmsWebSender.Controllers
 {
@@ -20,18 +23,15 @@ namespace SmsWebSender.Controllers
         private readonly IAppointmentService _appointmentService;
         private readonly ISmsService _smsService;
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ApplicationDbContext _dbContext;
         private const int IcelandicAreaCode = 354;
 
         public SmsController(IAppointmentService appointmentService,
             ISmsService smsService, 
-            UserManager<ApplicationUser> userManager,
-            ApplicationDbContext dbContext)
+            UserManager<ApplicationUser> userManager)
         {
             _appointmentService = appointmentService;
             _smsService = smsService;
             _userManager = userManager;
-            _dbContext = dbContext;
         }
 
         [Authorize]
@@ -90,18 +90,52 @@ namespace SmsWebSender.Controllers
         [Route("Send")]
         public async Task<bool> Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
+            _smsService.BatchProcessingFinished += SmsServiceOnBatchProcessingFinished;
             var sendingUser = await _userManager.FindByIdAsync(User.GetUserId());
 
+            var messageLinesToSend = new List<MessageLine>();
             foreach (var block in messageLinesBlocks)
             {
-                foreach (var messageLine in block.MessageLines.Where(line => line.ShouldBeSentTo))
+                messageLinesToSend.AddRange(block.MessageLines.Where(line => line.ShouldBeSentTo));
+            }
+
+            var messages = new List<Models.Message>();
+            foreach (var messageLine in messageLinesToSend)
+            {
+                string to = $"+{IcelandicAreaCode}{messageLine.Number}";
+                messages.Add(new Models.Message {To = to, From = sendingUser.SendSmsName , Body = messageLine.Body });
+            }
+            _smsService.SendBatch(messages);
+
+            return true;
+        }
+
+        private void SmsServiceOnBatchProcessingFinished(List<Twilio.Message> processedMessages)
+        {
+            int unsuccessfulMessage = 0;
+            int successfulMessage = 0;
+
+            foreach (var processedMessage in processedMessages)
+            {
+                if (processedMessage.ErrorCode.HasValue)
                 {
-                    string to = $"+{IcelandicAreaCode}{messageLine.Number}";
-                    _smsService.SendMessage(sendingUser.SendSmsName, to, messageLine.SmsText);
+                    unsuccessfulMessage++;
+                }
+                else
+                {
+                    successfulMessage++;
                 }
             }
 
-            return true;
+            string statusSendMessage = $"Vorum ad senda sms fyrir thig. Thad sendust {successfulMessage} sms. ";
+            if (unsuccessfulMessage > 0)
+            {
+                statusSendMessage += $"Hinsvegar tokst ekki ad senda {unsuccessfulMessage} sms. Skodadu vefsiduna okkar til ad sja hvad for urskeidis. ";
+            }
+
+            statusSendMessage += $"Kv, Hyldypi";
+
+            //_smsService.SendMessage(new Models.Message {To = "+3546643507", From="Hyldypi", Body = statusSendMessage});
         }
     }
 }

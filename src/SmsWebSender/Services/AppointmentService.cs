@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
@@ -38,23 +39,13 @@ namespace SmsWebSender.Services
                 foreach (var result in results)
                 {
                     string clientName = result.Summary;
-                    int gsmNumber = 0;
-                    if (result.Summary.Length > 7)
-                    {
-                        clientName = result.Summary.Substring(0, result.Summary.Length - 7);
-                        var gsmNumberString = result.Summary.Substring(result.Summary.Length - 7, 7);
-                        var hasNumber = int.TryParse(gsmNumberString, out gsmNumber);
-                        if (!hasNumber)
-                        {
-                            clientName = result.Summary;
-                        }
-                    }
-
                     var startTimeOfAppointment = DateTime.MinValue;
                     if (result.Start.DateTime.HasValue)
                     {
                         startTimeOfAppointment = result.Start.DateTime.Value;
                     }
+
+                    int gsmNumber = GetGsmNumberFromSummary(result.Summary);
 
                     appointments.Add(new Appointment
                     {
@@ -67,6 +58,22 @@ namespace SmsWebSender.Services
                 }
             }
             return appointments;
+        }
+
+        private int GetGsmNumberFromSummary(string summary)
+        {
+            int gsmNumber = 0;
+            string regexPhoneNumberPattern = @"[6-9]\d{2}[ ,-]?\d{4}";
+            var regex = new Regex(regexPhoneNumberPattern);
+            var regexNumberMatch = regex.Match(summary);
+            if (regexNumberMatch.Success)
+            {
+                var matchString = regexNumberMatch.Value;
+                matchString = matchString.Replace(" ", "");
+                matchString = matchString.Replace("-", "");
+                int.TryParse(matchString, out gsmNumber);
+            }
+            return gsmNumber;
         }
 
         private static CalendarService GetCalendarService()
