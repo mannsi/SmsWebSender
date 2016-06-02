@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Calendar.v3;
 using Google.Apis.Services;
+using Microsoft.Extensions.Configuration;
 using SmsWebSender.Models;
 using SmsWebSender.ServiceInterfaces;
 
@@ -15,6 +18,13 @@ namespace SmsWebSender.Services
 {
     public class AppointmentService: IAppointmentService
     {
+        private readonly IConfiguration _configuration;
+
+        public AppointmentService(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         public List<Appointment> AppointmentsForDay(DateTime day)
         {
             var startOfDay = new DateTime(day.Year, day.Month, day.Day);
@@ -76,21 +86,15 @@ namespace SmsWebSender.Services
             return gsmNumber;
         }
 
-        private static CalendarService GetCalendarService()
+        private CalendarService GetCalendarService()
         {
-            String serviceAccountEmail = "hyldypi@calendaraccessor-1322.iam.gserviceaccount.com";
+            GoogleCredential credential;
 
-            var certificate = new X509Certificate2(@"..\key.p12", "notasecret", X509KeyStorageFlags.Exportable);
-
-            ServiceAccountCredential credential = new ServiceAccountCredential(
-               new ServiceAccountCredential.Initializer(serviceAccountEmail)
-               {
-                   Scopes = new[]
-                   {
-                       CalendarService.Scope.Calendar, // Manage your calendars
- 	                    CalendarService.Scope.CalendarReadonly // View your CalendarsCalendarService.Scope.CalendarReadonly
-                   }
-               }.FromCertificate(certificate));
+            using (var stream = new FileStream(_configuration["GoogleCertPath"], FileMode.Open, FileAccess.Read))
+            {
+                credential = GoogleCredential.FromStream(stream)
+                    .CreateScoped(CalendarService.Scope.CalendarReadonly);
+            }
 
             // Create the service.
             var service = new CalendarService(new BaseClientService.Initializer()

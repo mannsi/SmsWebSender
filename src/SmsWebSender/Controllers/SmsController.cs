@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Authorization;
@@ -62,7 +63,16 @@ namespace SmsWebSender.Controllers
         public async Task<JsonResult> MessageLinesBlocks(DateTime date)
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
-            var appointmentsForDay = _appointmentService.AppointmentsForDay(date);
+            List<Appointment> appointmentsForDay;
+            try
+            {
+                 appointmentsForDay = _appointmentService.AppointmentsForDay(date);
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = (int) HttpStatusCode.Forbidden;
+                return new JsonResult(ex.Message);
+            }
             var messageLinesBlocks = new List<MessageLinesBlock>();
 
             foreach (var appointment in appointmentsForDay)
@@ -107,6 +117,22 @@ namespace SmsWebSender.Controllers
             _smsService.SendBatch(messages);
 
             return true;
+        }
+
+
+        [Route("Test")]
+        [HttpGet]
+        public IActionResult Test()
+        {
+            return View();
+        }
+
+        [Authorize]
+        [Route("Test")]
+        [HttpPost]
+        public void Test(SmsWebSender.Models.Message vm)
+        {
+            _smsService.SendMessage(vm);
         }
 
         private void SmsServiceOnBatchProcessingFinished(List<Twilio.Message> processedMessages)
