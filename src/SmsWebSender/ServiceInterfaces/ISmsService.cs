@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using SmsWebSender.Models;
 
 
 namespace SmsWebSender.ServiceInterfaces
@@ -7,8 +8,8 @@ namespace SmsWebSender.ServiceInterfaces
 
     public interface ISmsService
     {
-        void SendMessage(Models.Message messageToSend);
-        void SendBatch(List<SmsWebSender.Models.Message> messagesToSend);
+        void SendMessage(SmsMessage messageToSend);
+        void SendBatch(List<SmsMessage> messagesToSend);
         List<Twilio.Message> GetMessages();
     }
 }

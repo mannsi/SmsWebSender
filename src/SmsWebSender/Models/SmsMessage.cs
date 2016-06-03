@@ -6,21 +6,20 @@ using System.Threading.Tasks;
 
 namespace SmsWebSender.Models
 {
-    public class Message
+    public class SmsMessage
     {
-        public Message()
+        public SmsMessage()
         {
 
         }
 
-        public Message(Twilio.Message twilioMessage)
+        public SmsMessage(Twilio.Message twilioMessage)
         {
             To = twilioMessage.To;
             From = twilioMessage.From;
             Body = twilioMessage.Body;
         }
 
-        public string Id => $"{To}{Body}";
         public string To { get; set; }
         public string From { get; set; }
         public string Body { get; set; }

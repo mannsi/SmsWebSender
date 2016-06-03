@@ -7,7 +7,6 @@ using Microsoft.Extensions.Configuration;
 using SmsWebSender.Models;
 using SmsWebSender.ServiceInterfaces;
 using Twilio;
-using Message = Twilio.Message;
 
 namespace SmsWebSender.Services
 {
@@ -30,20 +29,15 @@ namespace SmsWebSender.Services
             return twilio.ListMessages(options).Messages;
         }
 
-        public void SendMessage(Models.Message messageToSend)
+        public void SendMessage(SmsMessage messageToSend)
         {
             string accountSid = _configuration["TwilioAccountSid"];
             string authToken = _configuration["TwilioAuthToken"];
             var twilio = new Twilio.TwilioRestClient(accountSid, authToken);
-            twilio.SendMessage(messageToSend.From, messageToSend.To, messageToSend.Body, CallbackFunction);
+            twilio.SendMessage(messageToSend.From, messageToSend.To, messageToSend.Body);
         }
 
-        private void CallbackFunction(Twilio.Message twilioMessage)
-        {
-            Debug.WriteLine($"STATUS: {twilioMessage.Status}");
-        }
-
-        public void SendBatch(List<Models.Message> messagesToSend)
+        public void SendBatch(List<SmsMessage> messagesToSend)
         {
             foreach (var message in messagesToSend)
             {

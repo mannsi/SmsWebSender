@@ -12,5 +12,8 @@ namespace SmsWebSender.Models
         public string CompanyName { get; set; }
         public string SendSmsName { get; set; }
         public string SmsTemplate { get; set; }
+        public string UsersGsmNumber { get; set; }
+        public bool SendSmsConfirmationToUser { get; set; }
+        public bool SenEmailConfirmationToUser { get; set; }
     }
 }

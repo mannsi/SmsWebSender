@@ -100,7 +100,6 @@ namespace SmsWebSender.Controllers
         [Route("Send")]
         public async Task<bool> Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
-            var sendingUser = await _userManager.FindByIdAsync(User.GetUserId());
 
             var messageLinesToSend = new List<MessageLine>();
             foreach (var block in messageLinesBlocks)
@@ -108,17 +107,34 @@ namespace SmsWebSender.Controllers
                 messageLinesToSend.AddRange(block.MessageLines.Where(line => line.ShouldBeSentTo));
             }
 
-            var messages = new List<Models.Message>();
+            var messages = new List<SmsMessage>();
+            var sendingUser = await _userManager.FindByIdAsync(User.GetUserId());
             foreach (var messageLine in messageLinesToSend)
             {
                 string to = $"+{IcelandicAreaCode}{messageLine.Number}";
-                messages.Add(new Models.Message {To = to, From = sendingUser.SendSmsName , Body = messageLine.Body });
+                messages.Add(new SmsMessage {To = to, From = sendingUser.SendSmsName , Body = messageLine.Body });
             }
-            _smsService.SendBatch(messages);
+
+            if (messages.Any() && sendingUser.SendSmsConfirmationToUser)
+            {
+                SendConfirmationSms(sendingUser, messages);
+                _smsService.SendBatch(messages);
+            }
 
             return true;
         }
 
+        private void SendConfirmationSms(ApplicationUser user, List<SmsMessage> messagesToSend)
+        {
+            var message = new SmsMessage
+            {
+                To = $"+{IcelandicAreaCode}{user.UsersGsmNumber}",
+                From = "Hyldypi",
+                Body = $"Vorum ad senda {messagesToSend.Count} sms fyrir thig. Vid latum thig vita ef einhver theirra komast ekki til skila." 
+            };
+
+            _smsService.SendMessage(message);
+        }
 
         [Route("Test")]
         [HttpGet]
@@ -130,7 +146,7 @@ namespace SmsWebSender.Controllers
         [Authorize]
         [Route("Test")]
         [HttpPost]
-        public void Test(SmsWebSender.Models.Message vm)
+        public void Test(SmsWebSender.Models.SmsMessage vm)
         {
             _smsService.SendMessage(vm);
         }
