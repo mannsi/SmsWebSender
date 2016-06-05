@@ -96,6 +96,12 @@
             fetchFunc(tomorrow);
         };
 
+        vm.fetchAfter3Days = function () {
+            vm.messageLinesBlocks = [];
+            var tomorrow = addDays(new Date(), 3);
+            fetchFunc(tomorrow);
+        };
+
         vm.validGsmNumber = function (numberString) {
             return !numberString.startsWith('5') && numberString.length === 7 && stringIsNumeric(numberString);
         };

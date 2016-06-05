@@ -8,8 +8,8 @@ namespace SmsWebSender.ServiceInterfaces
 
     public interface ISmsService
     {
-        void SendMessage(SmsMessage messageToSend);
-        void SendBatch(List<SmsMessage> messagesToSend);
+        void SendMessage(SmsMessage messageToSend, string callbackUrl);
+        void SendBatch(List<SmsMessage> messagesToSend, string callbackUrl);
         List<Twilio.Message> GetMessages();
     }
 }

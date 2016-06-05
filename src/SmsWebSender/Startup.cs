@@ -52,7 +52,7 @@ namespace SmsWebSender
                 connectionString = Configuration["Data:DefaultConnection:SmsSenderProductionConnectionString"];
             }
 
-            // Add framework services.
+            // Add framework services.team
             services.AddEntityFramework()
                 .AddSqlServer()
                 .AddDbContext<ApplicationDbContext>(options =>
@@ -75,6 +75,7 @@ namespace SmsWebSender
             services.AddSingleton(provider => Configuration);
             services.AddTransient<IAppointmentService, AppointmentService>();
             services.AddTransient<ISmsService, SmsService>();
+            services.AddTransient<IEmailService, EmailService>();
 
         }
 

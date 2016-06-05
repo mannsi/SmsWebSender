@@ -1,14 +1,15 @@
 ﻿@model SmsWebSender.Models.SmsMessage
 
-<h2>Prufu SMS</h2>
 <section>
+    <h2>Prufu SMS</h2>
+
     <form asp-controller="Sms" asp-action="Testing" method="post" class="form-horizontal" role="form">
-        <hr />
+        <hr/>
         <div asp-validation-summary="ValidationSummary.All" class="text-danger"></div>
         <div class="form-group">
             <label asp-for="From" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <input asp-for="From" class="form-control" />
+                <input asp-for="From" class="form-control"/>
                 <span asp-validation-for="From" class="text-danger"></span>
             </div>
         </div>
@@ -22,7 +23,7 @@
         <div class="form-group">
             <label asp-for="Body" class="col-md-2 control-label"></label>
             <div class="col-md-10">
-                <input asp-for="Body" class="form-control" />
+                <input asp-for="Body" class="form-control"/>
                 <span asp-validation-for="Body" class="text-danger"></span>
             </div>
         </div>
@@ -33,3 +34,4 @@
         </div>
     </form>
 </section>
+<a asp-controller="Sms" asp-action="TestEmailSending" asp-route-SmsStatus="bla" asp-route-From="fromSomeone" asp-route-To="mannsi1983@gmail.com" class="btn">Senda test mail</a>

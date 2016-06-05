@@ -9,6 +9,7 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Data.Entity.Metadata.Internal;
+using Microsoft.Extensions.Configuration;
 using RestSharp;
 using SmsWebSender.Models;
 using SmsWebSender.ServiceInterfaces;
@@ -24,15 +25,24 @@ namespace SmsWebSender.Controllers
         private readonly IAppointmentService _appointmentService;
         private readonly ISmsService _smsService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
+        private readonly ApplicationDbContext _context;
         private const int IcelandicAreaCode = 354;
 
         public SmsController(IAppointmentService appointmentService,
             ISmsService smsService, 
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            IEmailService emailService,
+            IConfiguration configuration,
+            ApplicationDbContext context)
         {
             _appointmentService = appointmentService;
             _smsService = smsService;
             _userManager = userManager;
+            _emailService = emailService;
+            _configuration = configuration;
+            _context = context;
         }
 
         [Authorize]
@@ -117,8 +127,9 @@ namespace SmsWebSender.Controllers
 
             if (messages.Any() && sendingUser.SendSmsConfirmationToUser)
             {
-                SendConfirmationSms(sendingUser, messages);
-                _smsService.SendBatch(messages);
+                //SendConfirmationSms(sendingUser, messages);
+                _smsService.SendBatch(messages, _configuration["smsWebSenderCallbackUrl"]
+            );
             }
 
             return true;
@@ -133,7 +144,7 @@ namespace SmsWebSender.Controllers
                 Body = $"Vorum ad senda {messagesToSend.Count} sms fyrir thig. Vid latum thig vita ef einhver theirra komast ekki til skila." 
             };
 
-            _smsService.SendMessage(message);
+            _smsService.SendMessage(message, _configuration["smsWebSenderCallbackUrl"]);
         }
 
         [Route("Test")]
@@ -148,35 +159,41 @@ namespace SmsWebSender.Controllers
         [HttpPost]
         public void Test(SmsWebSender.Models.SmsMessage vm)
         {
-            _smsService.SendMessage(vm);
+            _smsService.SendMessage(vm, _configuration["smsWebSenderCallbackUrl"]);
         }
 
-        private void SmsServiceOnBatchProcessingFinished(List<Twilio.Message> processedMessages)
+        [Route("SmsCallback")]
+        [HttpPost]
+        public async Task SmsCallback(string SmsStatus, string From, string To)
         {
-            int unsuccessfulMessage = 0;
-            int successfulMessage = 0;
-
-            foreach (var processedMessage in processedMessages)
+            // Only wish to alert the user of an unsuccessful status 
+            if (SmsStatus != "undelivered" && SmsStatus != "failed")
             {
-                if (processedMessage.ErrorCode.HasValue)
-                {
-                    unsuccessfulMessage++;
-                }
-                else
-                {
-                    successfulMessage++;
-                }
+                return;
             }
 
-            string statusSendMessage = $"Vorum ad senda sms fyrir thig. Thad sendust {successfulMessage} sms. ";
-            if (unsuccessfulMessage > 0)
+            var user = _context.Users.FirstOrDefault(u => u.SendSmsName == From);
+            if (user == null)
             {
-                statusSendMessage += $"Hinsvegar tokst ekki ad senda {unsuccessfulMessage} sms. Skodadu vefsiduna okkar til ad sja hvad for urskeidis. ";
+                return;
             }
 
-            statusSendMessage += $"Kv, Hyldypi";
+            string errorMessage = $"Ekki tokst a senda sms i numerid {To}";
+            _smsService.SendMessage(new SmsMessage {From = "Hyldypi", To=$"+{IcelandicAreaCode}{user.UsersGsmNumber}", Body= errorMessage }, "" );
 
-            //_smsService.SendMessage(new Models.Message {To = "+3546643507", From="Hyldypi", Body = statusSendMessage});
+            // Also send to me so I can keep track of things
+            await
+                _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Sms sending mistókst", errorMessage, "hyldypi@hyldypi.is",
+                        "Hyldýpi");
         }
+
+        [Route("TestEmailSending")]
+        public async Task TestEmailSending(string SmsStatus, string From, string To)
+        {
+            await
+                _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "SMS test mail",
+                    $"SmsStatus: {SmsStatus}, From: {From}, To: {To}", "hyldypi@hyldypi.is", "Hyldýpi");
+        }
+
     }
 }

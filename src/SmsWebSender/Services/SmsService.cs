@@ -29,19 +29,26 @@ namespace SmsWebSender.Services
             return twilio.ListMessages(options).Messages;
         }
 
-        public void SendMessage(SmsMessage messageToSend)
+        public void SendMessage(SmsMessage messageToSend, string callbackUrl)
         {
             string accountSid = _configuration["TwilioAccountSid"];
             string authToken = _configuration["TwilioAuthToken"];
             var twilio = new Twilio.TwilioRestClient(accountSid, authToken);
-            twilio.SendMessage(messageToSend.From, messageToSend.To, messageToSend.Body);
+            if (!string.IsNullOrEmpty(callbackUrl))
+            {
+                twilio.SendMessage(messageToSend.From, messageToSend.To, messageToSend.Body, callbackUrl);
+            }
+            else
+            {
+                twilio.SendMessage(messageToSend.From, messageToSend.To, messageToSend.Body);
+            }
         }
 
-        public void SendBatch(List<SmsMessage> messagesToSend)
+        public void SendBatch(List<SmsMessage> messagesToSend, string callbackUrl)
         {
             foreach (var message in messagesToSend)
             {
-                SendMessage(message);
+                SendMessage(message, callbackUrl);
             }
         }
 
