@@ -125,12 +125,14 @@ namespace SmsWebSender.Controllers
                 messages.Add(new SmsMessage {To = to, From = sendingUser.SendSmsName , Body = messageLine.Body });
             }
 
-            if (messages.Any() && sendingUser.SendSmsConfirmationToUser)
+            if (!messages.Any()) return true;
+
+            if (sendingUser.SendSmsConfirmationToUser)
             {
-                //SendConfirmationSms(sendingUser, messages);
-                _smsService.SendBatch(messages, _configuration["smsWebSenderCallbackUrl"]
-            );
+                SendConfirmationSms(sendingUser, messages);
             }
+
+            _smsService.SendBatch(messages, _configuration["smsWebSenderCallbackUrl"]);
 
             return true;
         }
