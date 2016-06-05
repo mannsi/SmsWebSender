@@ -80,7 +80,15 @@ namespace SmsWebSender
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public async void Configure(
+            IApplicationBuilder app,
+            IHostingEnvironment env, 
+            ILoggerFactory loggerFactory,
+            ISmsService smsService,
+            IAppointmentService appointmentService,
+            IEmailService emailService,
+            ApplicationDbContext dbcontext,
+            IConfiguration configuration)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -122,7 +130,8 @@ namespace SmsWebSender
                     name: "default",
                     template: "{controller=Account}/{action=Login}/{id?}");
             });
-
+            
+            //Jobs.Sms.JobStart.Start(smsService, appointmentService, emailService, dbcontext, configuration);
             await InitialData.InitializeUser(app.ApplicationServices, Configuration["defaultUserPassword"]);
         }
 

@@ -15,5 +15,8 @@ namespace SmsWebSender.Models
         public string UsersGsmNumber { get; set; }
         public bool SendSmsConfirmationToUser { get; set; }
         public bool SenEmailConfirmationToUser { get; set; }
+
+        public bool ShouldAutoSendSms { get; set; }
+        public int AutoSendHour { get; set; }
     }
 }

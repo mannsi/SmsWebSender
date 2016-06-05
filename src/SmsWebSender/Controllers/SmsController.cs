@@ -73,44 +73,68 @@ namespace SmsWebSender.Controllers
         public async Task<JsonResult> MessageLinesBlocks(DateTime date)
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
-            List<Appointment> appointmentsForDay;
-            try
-            {
-                 appointmentsForDay = _appointmentService.AppointmentsForDay(date);
-            }
-            catch (Exception ex)
-            {
-                Response.StatusCode = (int) HttpStatusCode.Forbidden;
-                return new JsonResult(ex.Message);
-            }
-            var messageLinesBlocks = new List<MessageLinesBlock>();
+            var messageLinesBlocks = GetMessageLineBlocks(date, _appointmentService, user, false);
 
-            foreach (var appointment in appointmentsForDay)
+            if (messageLinesBlocks == null)
             {
-                var block = messageLinesBlocks.FirstOrDefault(mlb => mlb.EmployeeName == appointment.EmployeeName);
-                if (block == null)
-                {
-                    block = new MessageLinesBlock {EmployeeName = appointment.EmployeeName};
-                    messageLinesBlocks.Add(block);
-                }
-
-                block.MessageLines.Add(new MessageLine(user.SmsTemplate, appointment.StartTimeOfAppointment, appointment.GsmNumber.ToString())
-                {
-                    Name = appointment.ClientName,
-                    CalendarId = appointment.CalendarId,
-                });
-
+                Response.StatusCode = (int)HttpStatusCode.Forbidden;
+                return new JsonResult("Error getting message data");
             }
 
             return new JsonResult(messageLinesBlocks);
         }
 
+        internal static List<MessageLinesBlock> GetMessageLineBlocks(DateTime date, IAppointmentService appointmentService, ApplicationUser user, bool onlyIncludeShouldSendLines)
+        {
+            List<Appointment> appointmentsForDay;
+            try
+            {
+                appointmentsForDay = appointmentService.AppointmentsForDay(date);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+            var messageLinesBlocks = new List<MessageLinesBlock>();
+
+            foreach (var appointment in appointmentsForDay)
+            {
+                var messageLine = new MessageLine(user.SmsTemplate, appointment.StartTimeOfAppointment,
+                    appointment.GsmNumber.ToString())
+                {
+                    Name = appointment.ClientName,
+                    CalendarId = appointment.CalendarId,
+                };
+
+                if (onlyIncludeShouldSendLines && !messageLine.ShouldBeSentTo)
+                {
+                    continue;
+                }
+
+                var block = messageLinesBlocks.FirstOrDefault(mlb => mlb.EmployeeName == appointment.EmployeeName);
+                if (block == null)
+                {
+                    block = new MessageLinesBlock { EmployeeName = appointment.EmployeeName };
+                    messageLinesBlocks.Add(block);
+                }
+
+                block.MessageLines.Add(messageLine);
+            }
+
+            return messageLinesBlocks;
+        }
+
         [HttpPost]
         [Authorize]
         [Route("Send")]
-        public async Task<bool> Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
+        public async Task Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
+            var user = await _userManager.FindByIdAsync(User.GetUserId());
+            SendBatch(messageLinesBlocks, _smsService, user, _configuration);
+        }
 
+        internal static void SendBatch(List<MessageLinesBlock> messageLinesBlocks, ISmsService smsService, ApplicationUser sendingUser, IConfiguration configuration)
+        {
             var messageLinesToSend = new List<MessageLine>();
             foreach (var block in messageLinesBlocks)
             {
@@ -118,26 +142,23 @@ namespace SmsWebSender.Controllers
             }
 
             var messages = new List<SmsMessage>();
-            var sendingUser = await _userManager.FindByIdAsync(User.GetUserId());
             foreach (var messageLine in messageLinesToSend)
             {
                 string to = $"+{IcelandicAreaCode}{messageLine.Number}";
-                messages.Add(new SmsMessage {To = to, From = sendingUser.SendSmsName , Body = messageLine.Body });
+                messages.Add(new SmsMessage { To = to, From = sendingUser.SendSmsName, Body = messageLine.Body });
             }
 
-            if (!messages.Any()) return true;
+            if (!messages.Any()) return;
 
             if (sendingUser.SendSmsConfirmationToUser)
             {
-                SendConfirmationSms(sendingUser, messages);
+                SendConfirmationSms(sendingUser, messages, smsService, configuration);
             }
 
-            _smsService.SendBatch(messages, _configuration["smsWebSenderCallbackUrl"]);
-
-            return true;
+            smsService.SendBatch(messages, configuration["smsWebSenderCallbackUrl"]);
         }
 
-        private void SendConfirmationSms(ApplicationUser user, List<SmsMessage> messagesToSend)
+        private static void SendConfirmationSms(ApplicationUser user, List<SmsMessage> messagesToSend, ISmsService smsService, IConfiguration configuration)
         {
             var message = new SmsMessage
             {
@@ -146,7 +167,7 @@ namespace SmsWebSender.Controllers
                 Body = $"Vorum ad senda {messagesToSend.Count} sms fyrir thig. Vid latum thig vita ef einhver theirra komast ekki til skila." 
             };
 
-            _smsService.SendMessage(message, _configuration["smsWebSenderCallbackUrl"]);
+            smsService.SendMessage(message, configuration["smsWebSenderCallbackUrl"]);
         }
 
         [Route("Test")]
