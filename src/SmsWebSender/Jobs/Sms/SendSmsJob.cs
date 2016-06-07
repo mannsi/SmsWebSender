@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNet.Identity;
 using Microsoft.Extensions.Configuration;
 using Quartz;
@@ -22,16 +23,26 @@ namespace SmsWebSender.Jobs.Sms
 
             var today = DateTime.Now.Date;
             var tomorrow = today.AddDays(1);
+            var twoDaysFromNow = today.AddDays(2);
             var threeDaysFromNow = today.AddDays(3);
 
             var allUsers = dbcontext.Users.ToList();
             foreach (var user in allUsers)
             {
+
                 // TODO Commented out for testing. 
                 //if (user.ShouldAutoSendSms && DateTime.Now.Hour == user.AutoSendHour)
                 {
-                    SendForDay(tomorrow, appointmentService, user, smsService, configuration, emailService);
-                    SendForDay(threeDaysFromNow, appointmentService, user, smsService, configuration, emailService);
+                    List<DateTime> daysToSend = new List<DateTime>();
+                    if (user.SendSameDay) daysToSend.Add(today);
+                    if (user.SendDayBefore) daysToSend.Add(tomorrow);
+                    if (user.SendTwoDaysBefore) daysToSend.Add(twoDaysFromNow);
+                    if (user.SendThreeDaysBefore) daysToSend.Add(threeDaysFromNow);
+
+                    foreach (var dayToSend in daysToSend)
+                    {
+                        SendForDay(dayToSend, appointmentService, user, smsService, configuration, emailService);
+                    }
                 }
             }
         }
