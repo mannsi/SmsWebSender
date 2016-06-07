@@ -1,4 +1,6 @@
-﻿@model SettingsViewModel
+﻿@using System.Threading.Tasks
+@using Newtonsoft.Json
+@model SettingsViewModel
 
 @section Scripts{
     <script src="~/lib/angular/angular.min.js"></script>
@@ -18,28 +20,95 @@
     <h1 class="page-header">Stillingar</h1>
 </div>
 
-<div class="row" ng-app="app-sms" ng-controller="accountSettingsController as vm" ng-init="vm.initData('@Model.SendSmsName', '@Model.SmsTemplate')">
+<div class="row" ng-app="app-sms" ng-controller="accountSettingsController as vm" ng-init="vm.initData(@JsonConvert.SerializeObject(@Model))">
     <form name="settingsForm" id="settingsForm" novalidate asp-controller="Account" asp-action="Settings" method="post" class="form-horizontal" role="form">
         <div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
         <div class="form-group">
-            <label asp-for="SendSmsName" class="col-md-2 control-label"></label>
+            <label class="col-md-2 control-label">Sms berist frá</label>
             <div class="col-md-10">
-                <input name="SendSmsName" id="SendSmsName" class="form-control" ng-model="vm.senderName" required ng-maxlength="11" ng-pattern="vm.allowedSenderNameRegex"/>
+                <input name="SendSmsName" id="SendSmsName" class="form-control" ng-model="vm.accountSettingsViewModel.SendSmsName" required ng-maxlength="11" ng-pattern="vm.allowedSenderNameRegex"/>
                 <span ng-show="settingsForm.SendSmsName.$error.required" class="text-warning">Má ekki vera tómt</span>
                 <span ng-show="settingsForm.SendSmsName.$error.maxlength" class="text-warning">11 stafir eða styttra</span>
                 <span ng-show="settingsForm.SendSmsName.$error.pattern" class="text-warning">Engir íslenskri stafir</span>
             </div>
         </div>
         <div class="form-group">
-            <span class="col-md-2 text-right"><label asp-for="SmsTemplate" class="control-label"></label> <i class="fa fa-question-circle" data-toggle="tooltip" data-html="true" data-placement="top" title="Dæmi:<br/> <em>Minnum a timann thinn {dagsetning} kl {klukkan}. Kvedja, Fyrirtaeki</em>"></i></span>
-            
+            <span class="col-md-2 text-right"><label class="control-label">Snið fyrir sms</label> <i class="fa fa-question-circle" data-toggle="tooltip" data-html="true" data-placement="top" title="Dæmi:<br/> <em>Minnum a timann thinn {dagsetning} kl {klukkan}. Kvedja, Fyrirtaeki</em>"></i></span>
             <div class="col-md-10">
-                <textarea asp-for="SmsTemplate" class="form-control"></textarea>
+                <textarea class="form-control" ng-model="vm.accountSettingsViewModel.SmsTemplate"></textarea>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-2 text-right">
+                <label class="control-label">Senda sjálfkrafa</label>
+            </div>
+            <div class="col-md-10">
+                <input type="checkbox" ng-model="vm.accountSettingsViewModel.SendAutomatically"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label class="control-label">Samdægurs</label>
+            </div>
+            <div class="col-md-9">
+                <input type="checkbox" ng-model="vm.accountSettingsViewModel.SendSameDay" ng-disabled="!vm.accountSettingsViewModel.SendAutomatically"/>
             </div>
         </div>
         <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label class="control-label">Daginn áður</label>
+            </div>
+            <div class="col-md-9">
+                <input type="checkbox" ng-model="vm.accountSettingsViewModel.SendDayBefore" ng-disabled="!vm.accountSettingsViewModel.SendAutomatically"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label class="control-label">2 dögum áður</label>
+            </div>
+            <div class="col-md-9">
+                <input type="checkbox" ng-model="vm.accountSettingsViewModel.SendTwoDaysBefore" ng-disabled="!vm.accountSettingsViewModel.SendAutomatically"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label class="control-label">3 dögum áður</label>
+            </div>
+            <div class="col-md-9">
+                <input type="checkbox" ng-model="vm.accountSettingsViewModel.SendThreeDaysBefore" ng-disabled="!vm.accountSettingsViewModel.SendAutomatically"/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-3 text-right">
+                <label class="control-label">Senda klukkan</label>
+            </div>
+            <div class="col-md-9">
+                <select ng-model="vm.accountSettingsViewModel.AutomaticSendHour" ng-disabled="!vm.accountSettingsViewModel.SendAutomatically" style="margin-top: 10px;">
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                    <option value="21">21</option>
+                    <option value="22">22</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
             <div class="col-md-offset-2 col-md-10">
-                <button type="submit" class="btn btn-success" ng-disabled="settingsForm.$invalid">Uppfæra</button>
+                <div type="submit" class="btn btn-success" ng-disabled="settingsForm.$invalid" ng-click="vm.save()">Uppfæra</div>
             </div>
         </div>
     </form>

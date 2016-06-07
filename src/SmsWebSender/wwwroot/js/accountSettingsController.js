@@ -4,16 +4,24 @@
     angular.module("app-sms")
         .controller("accountSettingsController", accountSettingsController);
 
-    function accountSettingsController() {
+    function accountSettingsController($http) {
         var vm = this;
 
-        vm.senderName = "";
-        vm.smsTemplate = "";
+        vm.accountSettingsViewModel = {};
 
-        vm.initData = function (senderName, smsTemplate) {
-            vm.senderName = senderName;
-            vm.smsTemplate = smsTemplate;
-        }
+        vm.initData = function(model) {
+            vm.accountSettingsViewModel = model;
+        };
+
+        vm.save = function() {
+            $http.post('/notandi/stillingar', vm.accountSettingsViewModel)
+                .then(function (response) {
+                    window.location.href = '/sms';
+                }, function (error) {
+                    vm.pageModified = true;
+                    alert("Ekki tókst að vista. Villa: " + error);
+                });
+        };
 
     };
 })()

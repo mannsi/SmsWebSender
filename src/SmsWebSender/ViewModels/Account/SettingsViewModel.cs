@@ -8,28 +8,24 @@ using SmsWebSender.ViewModels.Account;
 
 namespace SmsWebSender.ViewModels.Account
 {
-    public enum AutomaticSendOptionEnum
-    {
-        SameDay,
-        DayBefore
-    }
-
     public class SettingsViewModel
     {
         [Required(ErrorMessage = "Verður að fylla")]
         [DataType(DataType.Text)]
-        [Display(Name="Sms berist frá")]
         public string SendSmsName { get; set; }
 
         [Required(ErrorMessage = "Verður að fylla")]
         [DataType(DataType.MultilineText)]
-        [Display(Name = "Snið fyrir sms")]
         public string SmsTemplate { get; set; }
 
-        public string DefaultSmsTemplate { get; set; }
-
+        [Display(Name = "Senda sjálfkrafa")]
         public bool SendAutomatically { get; set; }
-        public AutomaticSendOptionEnum AutomaticSendOption { get; set; }
+
+        public bool SendSameDay { get; set; }
+        public bool SendDayBefore { get; set; }
+        public bool SendTwoDaysBefore { get; set; }
+        public bool SendThreeDaysBefore { get; set; }
+
         public int AutomaticSendHour { get; set; }
     }
 }

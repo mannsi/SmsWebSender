@@ -94,17 +94,31 @@ namespace SmsWebSender.Controllers
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             vm.SendSmsName = user.SendSmsName;
             vm.SmsTemplate = user.SmsTemplate;
+            vm.AutomaticSendHour = user.AutoSendHour;
+            vm.SendAutomatically = user.ShouldAutoSendSms;
+            vm.SendSameDay = user.SendSameDay;
+            vm.SendDayBefore = user.SendDayBefore;
+            vm.SendTwoDaysBefore = user.SendTwoDaysBefore;
+            vm.SendThreeDaysBefore = user.SendThreeDaysBefore;
+
             return View(vm);
         }
 
         [HttpPost]
         [Authorize]
         [Route("notandi/stillingar")]
-        public async Task<IActionResult> Settings(SettingsViewModel vm)
+        public async Task<IActionResult> Settings([FromBody]SettingsViewModel vm)
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
             user.SendSmsName = vm.SendSmsName;
             user.SmsTemplate = vm.SmsTemplate;
+            user.AutoSendHour = vm.AutomaticSendHour;
+            user.ShouldAutoSendSms = vm.SendAutomatically;
+            user.SendSameDay = vm.SendSameDay;
+            user.SendDayBefore = vm.SendDayBefore;
+            user.SendTwoDaysBefore = vm.SendTwoDaysBefore;
+            user.SendThreeDaysBefore = vm.SendThreeDaysBefore;
+
             await _userManager.UpdateAsync(user);
 
             return RedirectToAction("Index","Sms");

@@ -18,5 +18,10 @@ namespace SmsWebSender.Models
 
         public bool ShouldAutoSendSms { get; set; }
         public int AutoSendHour { get; set; }
+
+        public bool SendSameDay { get; set; }
+        public bool SendDayBefore { get; set; }
+        public bool SendTwoDaysBefore { get; set; }
+        public bool SendThreeDaysBefore { get; set; }
     }
 }
