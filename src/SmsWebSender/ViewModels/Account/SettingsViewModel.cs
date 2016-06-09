@@ -27,5 +27,6 @@ namespace SmsWebSender.ViewModels.Account
         public bool SendThreeDaysBefore { get; set; }
 
         public int AutomaticSendHour { get; set; }
+        public List<int> AvailableSendingHours { get; set; }
     }
 }

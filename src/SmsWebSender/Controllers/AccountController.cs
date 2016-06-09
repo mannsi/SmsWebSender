@@ -100,6 +100,7 @@ namespace SmsWebSender.Controllers
             vm.SendDayBefore = user.SendDayBefore;
             vm.SendTwoDaysBefore = user.SendTwoDaysBefore;
             vm.SendThreeDaysBefore = user.SendThreeDaysBefore;
+            vm.AvailableSendingHours = new List<int> {8,9,10,11,12,13,14,15,16,17,18,19,20,21,22};
 
             return View(vm);
         }
