@@ -66,7 +66,7 @@
                     $timeout(function () {
                         vm.fadeIn = false;
                         vm.startFade = true;
-                    }, 2000);
+                    }, 3000);
                     },
                     function() {
                         vm.errorMessage = "Gat ekki sent sms";
@@ -75,14 +75,6 @@
                     vm.isSending = false;
                 });
         }
-        //vm.addRecipient = function() {
-        //    vm.messageLines.push({
-        //        Name: "",
-        //        Number: "",
-        //        AppointmentStartTime: "",
-        //        Text: ""
-        //    });
-        //}
 
         vm.fetchToday = function () {
             vm.messageLinesBlocks = [];

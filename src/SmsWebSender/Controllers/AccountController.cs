@@ -40,7 +40,7 @@ namespace SmsWebSender.Controllers
         {
             if (User.IsSignedIn())
             {
-                return RedirectToAction("Index","Sms");
+                return RedirectToAction("List","Sms");
             }
 
             ViewData["ReturnUrl"] = returnUrl;
