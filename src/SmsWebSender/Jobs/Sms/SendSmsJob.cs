@@ -14,7 +14,6 @@ namespace SmsWebSender.Jobs.Sms
     {
         public void Execute(IJobExecutionContext context)
         {
-            // A single run of this function fetches data for tomorrow and 3 days from now and sends sms reminders to everybody that have appointments there.
             var appointmentService = (IAppointmentService) context.JobDetail.JobDataMap["appointmentService"];
             var smsService = (ISmsService) context.JobDetail.JobDataMap["smsService"];
             var emailService = (IEmailService)context.JobDetail.JobDataMap["emailService"];
@@ -53,19 +52,17 @@ namespace SmsWebSender.Jobs.Sms
 
             // Debug code
             // =============================================================
-            var numberOfMessage = (from block in messageLinesBlocks
-                from messageLine in block.MessageLines
-                select messageLine).Count();
-            var debugMessage =
-                $"Hefði sent sms skeyti á {messageLinesBlocks.Count} calendars fyrir daginn {date.ToString("dd.MM")}. Heildarfjöldi skeyta hefði verið {numberOfMessage}";
-            emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Prófun á quartz", debugMessage,
-                "hyldypi@hyldypi.is", "Hyldýpi").Wait();
+            //var numberOfMessage = (from block in messageLinesBlocks
+            //    from messageLine in block.MessageLines
+            //    select messageLine).Count();
+            //var debugMessage =
+            //    $"Hefði sent sms skeyti á {messageLinesBlocks.Count} calendars fyrir daginn {date.ToString("dd.MM")}. Heildarfjöldi skeyta hefði verið {numberOfMessage}";
+            //emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Prófun á quartz", debugMessage,
+            //    "hyldypi@hyldypi.is", "Hyldýpi").Wait();
             // =============================================================
 
-
-            //var sendTomorrowTask = SmsController.SendBatch(messageLinesTomorrow, smsService, userManager, sendingUserId,
-            //    configuration);
-            //sendTomorrowTask.Wait();
+            var sendTomorrowTask = SmsController.SendBatch(messageLinesBlocks, smsService, emailService, sendingUser, configuration, date);
+            sendTomorrowTask.Wait();
         }
     }
 }
