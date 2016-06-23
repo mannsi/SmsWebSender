@@ -130,10 +130,20 @@ namespace SmsWebSender.Controllers
         public async Task Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
             var user = await _userManager.FindByIdAsync(User.GetUserId());
-            SendBatch(messageLinesBlocks, _smsService, user, _configuration);
+            await SendBatch(messageLinesBlocks, _smsService, _emailService, user, _configuration, DateTime.MinValue);
         }
 
-        internal static void SendBatch(List<MessageLinesBlock> messageLinesBlocks, ISmsService smsService, ApplicationUser sendingUser, IConfiguration configuration)
+        /// <summary>
+        /// Sends a batch of sms messages
+        /// </summary>
+        /// <param name="messageLinesBlocks">Message to send</param>
+        /// <param name="smsService">Sms service</param>
+        /// <param name="emailService">Email service</param>
+        /// <param name="sendingUser">User we are sending for</param>
+        /// <param name="configuration">System configurations</param>
+        /// <param name="reminderDay">The day we are reminding clients about</param>
+        /// <returns></returns>
+        internal static async Task SendBatch(List<MessageLinesBlock> messageLinesBlocks, ISmsService smsService, IEmailService emailService, ApplicationUser sendingUser, IConfiguration configuration, DateTime reminderDay)
         {
             var messageLinesToSend = new List<MessageLine>();
             foreach (var block in messageLinesBlocks)
@@ -150,24 +160,37 @@ namespace SmsWebSender.Controllers
 
             if (!messages.Any()) return;
 
+            smsService.SendBatch(messages, "");
+            //smsService.SendBatch(messages, configuration["smsWebSenderCallbackUrl"]);
+
             if (sendingUser.SendSmsConfirmationToUser)
             {
-                SendConfirmationSms(sendingUser, messages, smsService, configuration);
-            }
+                SendConfirmationSms(sendingUser, messages, smsService, reminderDay);
 
-            smsService.SendBatch(messages, configuration["smsWebSenderCallbackUrl"]);
+                // DEBUG
+                // Also send to me so I can keep track of things
+                await emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Confirmation email", $"Sendi {messages.Count} skilaboð á {sendingUser.UserName}", "hyldypi@hyldypi.is", "Hyldýpi");
+            }
         }
 
-        private static void SendConfirmationSms(ApplicationUser user, List<SmsMessage> messagesToSend, ISmsService smsService, IConfiguration configuration)
+        /// <summary>
+        /// Send confirmation sms to user that sms messagse have been sent on his behalf
+        /// </summary>
+        /// <param name="user">User whos sms message where sent</param>
+        /// <param name="messagesToSend">The messages that were sent</param>
+        /// <param name="smsService">Sms service</param>
+        /// <param name="reminderDay">The date that clients where reminded about</param>
+        private static void SendConfirmationSms(ApplicationUser user, List<SmsMessage> messagesToSend, ISmsService smsService, DateTime reminderDay)
         {
             var message = new SmsMessage
             {
                 To = $"+{IcelandicAreaCode}{user.UsersGsmNumber}",
                 From = "Hyldypi",
-                Body = $"Vorum ad senda {messagesToSend.Count} sms fyrir thig. Vid latum thig vita ef einhver theirra komast ekki til skila." 
+                Body = $"Vorum ad senda {messagesToSend.Count} sms fyrir thig fyrir {reminderDay.ToString("dd.MM")}. Vid latum thig vita ef einhver theirra komast ekki til skila." 
             };
 
-            smsService.SendMessage(message, configuration["smsWebSenderCallbackUrl"]);
+            smsService.SendMessage(message, "");
+            
         }
 
         [Route("Test")]

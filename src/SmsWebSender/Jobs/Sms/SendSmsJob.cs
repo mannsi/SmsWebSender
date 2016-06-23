@@ -29,9 +29,7 @@ namespace SmsWebSender.Jobs.Sms
             var allUsers = dbcontext.Users.ToList();
             foreach (var user in allUsers)
             {
-
-                // TODO Commented out for testing. 
-                //if (user.ShouldAutoSendSms && DateTime.Now.Hour == user.AutoSendHour)
+                if (user.ShouldAutoSendSms && DateTime.UtcNow.Hour == user.AutoSendHour)
                 {
                     List<DateTime> daysToSend = new List<DateTime>();
                     if (user.SendSameDay) daysToSend.Add(today);
@@ -51,13 +49,15 @@ namespace SmsWebSender.Jobs.Sms
         {
             var messageLinesBlocks = SmsController.GetMessageLineBlocks(date, appointmentService, sendingUser, true);
 
+            if (!messageLinesBlocks.Any()) return;
+
             // Debug code
             // =============================================================
             var numberOfMessage = (from block in messageLinesBlocks
                 from messageLine in block.MessageLines
                 select messageLine).Count();
             var debugMessage =
-                $"Hefði sent sms skeyti á {messageLinesBlocks.Count} calendars. Heildarfjöldi skeyta hefði verið {numberOfMessage}";
+                $"Hefði sent sms skeyti á {messageLinesBlocks.Count} calendars fyrir daginn {date.ToString("dd.MM")}. Heildarfjöldi skeyta hefði verið {numberOfMessage}";
             emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Prófun á quartz", debugMessage,
                 "hyldypi@hyldypi.is", "Hyldýpi").Wait();
             // =============================================================

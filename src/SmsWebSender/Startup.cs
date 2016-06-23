@@ -131,7 +131,7 @@ namespace SmsWebSender
                     template: "{controller=Account}/{action=Login}/{id?}");
             });
             
-            //Jobs.Sms.JobStart.Start(smsService, appointmentService, emailService, dbcontext, configuration);
+            Jobs.Sms.JobStart.Start(smsService, appointmentService, emailService, dbcontext, configuration);
             await InitialData.InitializeUser(app.ApplicationServices, Configuration["defaultUserPassword"]);
         }
 
