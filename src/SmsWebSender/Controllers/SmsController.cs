@@ -160,8 +160,7 @@ namespace SmsWebSender.Controllers
 
             if (!messages.Any()) return;
 
-            smsService.SendBatch(messages, "");
-            //smsService.SendBatch(messages, configuration["smsWebSenderCallbackUrl"]);
+            smsService.SendBatch(messages, configuration["smsWebSenderCallbackUrl"]);
 
             if (sendingUser.SendSmsConfirmationToUser)
             {
@@ -225,7 +224,7 @@ namespace SmsWebSender.Controllers
             }
 
             string errorMessage = $"Ekki tokst a senda sms i numerid {To}";
-            _smsService.SendMessage(new SmsMessage {From = "Hyldypi", To=$"+{IcelandicAreaCode}{user.UsersGsmNumber}", Body= errorMessage }, "" );
+            _smsService.SendMessage(new SmsMessage { From = "Hyldypi", To = $"+{IcelandicAreaCode}{user.UsersGsmNumber}", Body = errorMessage }, "");
 
             // Also send to me so I can keep track of things
             await
