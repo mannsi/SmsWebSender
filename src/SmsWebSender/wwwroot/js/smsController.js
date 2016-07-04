@@ -31,7 +31,7 @@
             var dateString = date.toUTCString();
             $http(
                 {
-                    url: "/sms/messageLinesBlocks",
+                    url: "/smsApp/messageLinesBlocks",
                     method: 'GET',
                     params: { date: dateString }
                 }
@@ -58,7 +58,7 @@
         vm.sendSms = function() {
             vm.isSending = true;
             vm.errorMessage = "";
-            $http.post('/sms/send', vm.messageLinesBlocks)
+            $http.post('/smsApp/send', vm.messageLinesBlocks)
                 .then(function (response) {
                     vm.fadeIn = true;
                     vm.sendingSuccessMessage = "Sending tókst !";

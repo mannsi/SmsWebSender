@@ -16,7 +16,7 @@
         vm.save = function() {
             $http.post('/notandi/stillingar', vm.accountSettingsViewModel)
                 .then(function (response) {
-                    window.location.href = '/sms';
+                    window.location.href = '/smsApp';
                 }, function (error) {
                     vm.pageModified = true;
                     alert("Ekki tókst að vista. Villa: " + error);

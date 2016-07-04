@@ -31,11 +31,10 @@ namespace SmsWebSender.Controllers
             _logger = loggerFactory.CreateLogger<AccountController>();
         }
 
-        //
-        // GET: /Account/Login
+
         [HttpGet]
         [AllowAnonymous]
-        [Route("")]
+        [Route("innskraning")]
         public IActionResult Login(string returnUrl = null)
         {
             if (User.IsSignedIn())
@@ -47,11 +46,10 @@ namespace SmsWebSender.Controllers
             return View();
         }
 
-        //
-        // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
+        [Route("innskraning")]
         public async Task<IActionResult> Login(LoginViewModel vm, string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
@@ -75,8 +73,6 @@ namespace SmsWebSender.Controllers
             return View(vm);
         }
 
-        //
-        // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> LogOff()

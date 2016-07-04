@@ -128,7 +128,7 @@ namespace SmsWebSender
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Account}/{action=Login}/{id?}");
+                    template: "{controller=StartPage}/{action=LandingPage}/{id?}");
             });
             
             Jobs.Sms.JobStart.Start(smsService, appointmentService, emailService, dbcontext, configuration);

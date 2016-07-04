@@ -19,7 +19,7 @@ using Message = Twilio.Message;
 
 namespace SmsWebSender.Controllers
 {
-    [Route("sms")]
+    [Route("smsApp")]
     public class SmsController : Controller
     {
         private readonly IAppointmentService _appointmentService;
@@ -49,6 +49,8 @@ namespace SmsWebSender.Controllers
         [Route("")]
         public async Task<IActionResult> Index()
         {
+            return RedirectToAction("List");
+
             var userSending = await _userManager.FindByIdAsync(User.GetUserId());
 
             var vm = new SmsViewModel
