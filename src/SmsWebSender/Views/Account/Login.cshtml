@@ -1,15 +1,16 @@
 ﻿@using System.Collections.Generic
-@using Microsoft.AspNet.Http
-@using Microsoft.AspNet.Http.Authentication
-@model LoginViewModel
+@using SmsWebSender.Models
+@using SmsWebSender.ViewModels.Account
 @inject SignInManager<ApplicationUser> SignInManager
+@model LoginViewModel
+
 
 <div class="row">
     <div class="col-md-8">
         <section>
             <form asp-controller="Account" asp-action="Login" asp-route-returnurl="@ViewData["ReturnUrl"]" method="post" class="form-horizontal" role="form">
                 <h4>Innskráning</h4>
-                <div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                 <div class="form-group">
                     <label asp-for="Email" class="col-md-2 control-label"></label>
                     <div class="col-md-10">

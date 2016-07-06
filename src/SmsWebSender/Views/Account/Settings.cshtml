@@ -1,5 +1,6 @@
 ﻿@using System.Threading.Tasks
 @using Newtonsoft.Json
+@using SmsWebSender.ViewModels.Account
 @model SettingsViewModel
 
 @section Scripts{
@@ -22,7 +23,7 @@
 
 <div class="row" ng-app="app-sms" ng-controller="accountSettingsController as vm" ng-init="vm.initData(@JsonConvert.SerializeObject(@Model))">
     <form name="settingsForm" id="settingsForm" novalidate asp-controller="Account" asp-action="Settings" method="post" class="form-horizontal" role="form">
-        <div asp-validation-summary="ValidationSummary.ModelOnly" class="text-danger"></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label class="col-sm-4 col-md-2 control-label">Sms berist frá</label>
             <div class="col-sm-8 col-md-10">

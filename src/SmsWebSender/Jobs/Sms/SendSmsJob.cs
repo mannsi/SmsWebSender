@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.Identity;
 using Microsoft.Extensions.Configuration;
 using Quartz;
 using SmsWebSender.Controllers;
@@ -61,8 +60,7 @@ namespace SmsWebSender.Jobs.Sms
             //    "hyldypi@hyldypi.is", "Hyldýpi").Wait();
             // =============================================================
 
-            var sendTomorrowTask = SmsController.SendBatch(messageLinesBlocks, smsService, emailService, sendingUser, configuration, date);
-            sendTomorrowTask.Wait();
+            SmsController.SendBatch(messageLinesBlocks, smsService, emailService, sendingUser, configuration, date);
         }
     }
 }

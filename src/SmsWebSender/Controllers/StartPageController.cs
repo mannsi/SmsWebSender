@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Mail;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Rendering;
-using Microsoft.Data.Entity;
-using Microsoft.Extensions.Logging;
-using SmsWebSender.Models;
+
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmsWebSender.ServiceInterfaces;
-using SmsWebSender.ViewModels.Account;
 
 namespace SmsWebSender.Controllers
 {
@@ -45,7 +37,7 @@ namespace SmsWebSender.Controllers
         [HttpPost]
         [AllowAnonymous]
         [Route("contact")]
-        public async Task Contact(string name, string email, string message)
+        public void Contact(string name, string email, string message)
         {
             try
             {
@@ -58,7 +50,7 @@ namespace SmsWebSender.Controllers
             }
 
             // Send email to the given email address telling them we received their request
-            await _emailService.SendEmailAsync(email,
+            _emailService.SendEmailAsync(email,
                 "Staðfesting á fyrirspurn",
                 "Við höfum fengið fyrirspurn frá þér varðandi Sms áminningar. Við munum hafa samband við þig eins fljótt og við getum.",
                 "hyldypi@hyldypi.is",
@@ -66,7 +58,7 @@ namespace SmsWebSender.Controllers
 
             // Send email to me with the request, email and name
             // Send email to the given email address telling them we received their request
-            await _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com",
+            _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com",
                 "Fyrirspurn varðandi Sms áminningar",
                 $"Innihald: <br/> Nafn: {name}, Email: {email} <br/> Skilaboð: {message}",
                 "hyldypi@hyldypi.is",

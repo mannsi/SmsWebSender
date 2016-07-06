@@ -1,11 +1,16 @@
 ﻿@using System.Security.Claims
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.Razor
+@using SmsWebSender.Models
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
-@if (User.IsSignedIn())
+@if (SignInManager.IsSignedIn(User))
 {
     <form asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-user"></i> @User.GetUserName() <span class="caret"></span></a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><i class="fa fa-user"></i> @UserManager.GetUserName(User) <span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
                     <li><button type="submit" class="btn btn-link navbar-btn navbar-link"><i class="fa fa-sign-out"></i> Skrá út</button></li>
                 </ul>

@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Mvc.Rendering;
-using Microsoft.Data.Entity;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SmsWebSender.Models;
 using SmsWebSender.ViewModels.Account;
@@ -37,7 +35,7 @@ namespace SmsWebSender.Controllers
         [Route("innskraning")]
         public IActionResult Login(string returnUrl = null)
         {
-            if (User.IsSignedIn())
+            if (_signInManager.IsSignedIn(User))
             {
                 return RedirectToAction("List","Sms");
             }
@@ -87,7 +85,7 @@ namespace SmsWebSender.Controllers
         public async Task<IActionResult> Settings()
         {
             var vm = new SettingsViewModel();
-            var user = await _userManager.FindByIdAsync(User.GetUserId());
+            var user = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
             vm.SendSmsName = user.SendSmsName;
             vm.SmsTemplate = user.SmsTemplate;
             vm.AutomaticSendHour = user.AutoSendHour;
@@ -106,7 +104,7 @@ namespace SmsWebSender.Controllers
         [Route("notandi/stillingar")]
         public async Task<IActionResult> Settings([FromBody]SettingsViewModel vm)
         {
-            var user = await _userManager.FindByIdAsync(User.GetUserId());
+            var user = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
             user.SendSmsName = vm.SendSmsName;
             user.SmsTemplate = vm.SmsTemplate;
             user.AutoSendHour = vm.AutomaticSendHour;

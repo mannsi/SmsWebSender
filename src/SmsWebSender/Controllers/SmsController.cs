@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Mvc;
-using Microsoft.Data.Entity.Metadata.Internal;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using RestSharp;
 using SmsWebSender.Models;
 using SmsWebSender.ServiceInterfaces;
 using SmsWebSender.ViewModels.Sms;
-using Twilio;
-using Message = Twilio.Message;
 
 namespace SmsWebSender.Controllers
 {
@@ -51,7 +46,7 @@ namespace SmsWebSender.Controllers
         {
             return RedirectToAction("List");
 
-            var userSending = await _userManager.FindByIdAsync(User.GetUserId());
+            var userSending = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
 
             var vm = new SmsViewModel
             {
@@ -74,7 +69,7 @@ namespace SmsWebSender.Controllers
         [Route("MessageLinesBlocks")]
         public async Task<JsonResult> MessageLinesBlocks(DateTime date)
         {
-            var user = await _userManager.FindByIdAsync(User.GetUserId());
+            var user = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
             var messageLinesBlocks = GetMessageLineBlocks(date, _appointmentService, user, false);
 
             if (messageLinesBlocks == null)
@@ -131,8 +126,8 @@ namespace SmsWebSender.Controllers
         [Route("Send")]
         public async Task Send([FromBody]List<MessageLinesBlock> messageLinesBlocks)
         {
-            var user = await _userManager.FindByIdAsync(User.GetUserId());
-            await SendBatch(messageLinesBlocks, _smsService, _emailService, user, _configuration, DateTime.MinValue);
+            var user = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
+            SendBatch(messageLinesBlocks, _smsService, _emailService, user, _configuration, DateTime.MinValue);
         }
 
         /// <summary>
@@ -145,7 +140,7 @@ namespace SmsWebSender.Controllers
         /// <param name="configuration">System configurations</param>
         /// <param name="reminderDay">The day we are reminding clients about</param>
         /// <returns></returns>
-        internal static async Task SendBatch(List<MessageLinesBlock> messageLinesBlocks, ISmsService smsService, IEmailService emailService, ApplicationUser sendingUser, IConfiguration configuration, DateTime reminderDay)
+        internal static void SendBatch(List<MessageLinesBlock> messageLinesBlocks, ISmsService smsService, IEmailService emailService, ApplicationUser sendingUser, IConfiguration configuration, DateTime reminderDay)
         {
             var messageLinesToSend = new List<MessageLine>();
             foreach (var block in messageLinesBlocks)
@@ -170,7 +165,7 @@ namespace SmsWebSender.Controllers
 
                 // DEBUG
                 // Also send to me so I can keep track of things
-                await emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Confirmation email", $"Sendi {messages.Count} skilaboð á {sendingUser.UserName}", "hyldypi@hyldypi.is", "Hyldýpi");
+                emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Confirmation email", $"Sendi {messages.Count} skilaboð á {sendingUser.UserName}", "hyldypi@hyldypi.is", "Hyldýpi");
             }
         }
 
@@ -211,7 +206,7 @@ namespace SmsWebSender.Controllers
 
         [Route("SmsCallback")]
         [HttpPost]
-        public async Task SmsCallback(string SmsStatus, string From, string To)
+        public void SmsCallback(string SmsStatus, string From, string To)
         {
             // Only wish to alert the user of an unsuccessful status 
             if (SmsStatus != "undelivered" && SmsStatus != "failed")
@@ -229,16 +224,15 @@ namespace SmsWebSender.Controllers
             _smsService.SendMessage(new SmsMessage { From = "Hyldypi", To = $"+{IcelandicAreaCode}{user.UsersGsmNumber}", Body = errorMessage }, "");
 
             // Also send to me so I can keep track of things
-            await
+            
                 _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "Sms sending mistókst", errorMessage, "hyldypi@hyldypi.is",
                         "Hyldýpi");
         }
 
         [Route("TestEmailSending")]
-        public async Task TestEmailSending(string SmsStatus, string From, string To)
+        public void TestEmailSending(string SmsStatus, string From, string To)
         {
-            await
-                _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "SMS test mail",
+            _emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "SMS test mail",
                     $"SmsStatus: {SmsStatus}, From: {From}, To: {To}", "hyldypi@hyldypi.is", "Hyldýpi");
         }
 

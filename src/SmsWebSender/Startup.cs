@@ -1,17 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Identity.EntityFramework;
-using Microsoft.Data.Entity;
+﻿
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SmsWebSender.Models;
 using SmsWebSender.ServiceInterfaces;
 using SmsWebSender.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace SmsWebSender
 {
@@ -23,17 +21,16 @@ namespace SmsWebSender
         {
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables(); ;
 
             if (env.IsDevelopment())
             {
-                // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
                 _isDevelopment = true;
-                builder.AddUserSecrets();
             }
 
-            builder.AddEnvironmentVariables();
             Configuration = builder.Build();
         }
 
@@ -52,17 +49,15 @@ namespace SmsWebSender
                 connectionString = Configuration["Data:DefaultConnection:SmsSenderProductionConnectionString"];
             }
 
-            // Add framework services.team
-            services.AddEntityFramework()
-                .AddSqlServer()
-                .AddDbContext<ApplicationDbContext>(options =>
-                    options.UseSqlServer(connectionString));
+            // Add framework services.
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+                options.UseSqlServer(connectionString));
 
             services.AddIdentity<ApplicationUser, IdentityRole>(o =>
                 {
                     o.Password.RequireDigit = false;
                     o.Password.RequireLowercase = false;
-                    o.Password.RequireNonLetterOrDigit = false;
                     o.Password.RequireUppercase = false;
                     o.Password.RequiredLength = 6;
                     o.Cookies.ApplicationCookie.LoginPath = "/Account/Login";
@@ -72,7 +67,7 @@ namespace SmsWebSender
 
             services.AddMvc();
 
-            services.AddSingleton(provider => Configuration);
+            services.AddSingleton(Configuration);
             services.AddTransient<IAppointmentService, AppointmentService>();
             services.AddTransient<ISmsService, SmsService>();
             services.AddTransient<IEmailService, EmailService>();
@@ -116,8 +111,7 @@ namespace SmsWebSender
                 catch { }
             }
 
-            app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
-
+            //app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
             app.UseStaticFiles();
 
             app.UseIdentity();
@@ -135,7 +129,5 @@ namespace SmsWebSender
             await InitialData.InitializeUser(app.ApplicationServices, Configuration["defaultUserPassword"]);
         }
 
-        // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
 }

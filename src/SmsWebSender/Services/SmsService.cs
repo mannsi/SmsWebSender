@@ -33,7 +33,7 @@ namespace SmsWebSender.Services
         {
             string accountSid = _configuration["TwilioAccountSid"];
             string authToken = _configuration["TwilioAuthToken"];
-            var twilio = new Twilio.TwilioRestClient(accountSid, authToken);
+            var twilio = new TwilioRestClient(accountSid, authToken);
             if (!string.IsNullOrEmpty(callbackUrl))
             {
                 twilio.SendMessage(messageToSend.From, messageToSend.To, messageToSend.Body, callbackUrl);
