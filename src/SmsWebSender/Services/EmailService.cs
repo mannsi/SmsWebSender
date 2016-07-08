@@ -17,20 +17,6 @@ namespace SmsWebSender.Services
 
         public void SendEmailAsync(string emailAddress, string subject, string message, string from, string fromDisplayName)
         {
-            // Plug in your email service here to send an email.
-            //var myMessage = new SendGrid.SendGridAPIClient(_configuration["SendGridApiKey"]);
-            //myMessage.client
-            //myMessage.AddTo(emailAddress);
-            //myMessage.From = new System.Net.Mail.MailAddress(from, fromDisplayName);
-            //myMessage.Subject = subject;
-            //myMessage.Text = message;
-            //myMessage.Html = message;
-            //// Create a Web transport for sending email.
-            //var transportWeb = new SendGrid.Web(_configuration["SendGridApiKey"]);
-            //// Send the email.
-            //return transportWeb.DeliverAsync(myMessage);
-
-
             String apiKey = _configuration["SendGridApiKey"];
             dynamic sg = new SendGridAPIClient(apiKey);
 

@@ -34,6 +34,7 @@
     "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "1.0.0",
     "Microsoft.AspNetCore.Identity": "1.0.0",
     "Microsoft.EntityFrameworkCore": "1.0.0",
+    "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final",
     "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0",
     "Microsoft.EntityFrameworkCore.SqlServer": "1.0.0"
   },
@@ -71,7 +72,7 @@
   },
 
   "scripts": {
-    "prepublish": [ "bower install" ],
+    "prepublish": [ "bower install", "dotnet bundle" ],
     "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
     //"postpublish": [ "" ]
     //"postpublish": [ "dnx ef database update -e Staging" ]
