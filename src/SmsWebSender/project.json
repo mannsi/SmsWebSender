@@ -73,7 +73,7 @@
 
   "scripts": {
     "prepublish": [ "bower install", "dotnet bundle" ],
-    "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%" ]
+    "postpublish": [ "dotnet publish-iis --publish-folder %publish:OutputPath% --framework %publish:FullTargetFramework%", "dotnet ef database update -e Staging" ]
     //"postpublish": [ "" ]
     //"postpublish": [ "dnx ef database update -e Staging" ]
   }

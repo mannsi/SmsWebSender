@@ -1,5 +1,4 @@
 ﻿/// <autosync enabled="true" />
-/// <reference path="../gulpfile.js" />
 /// <reference path="js/accountsettingscontroller.js" />
 /// <reference path="js/app-sms.js" />
 /// <reference path="js/contactformcontroller.js" />
