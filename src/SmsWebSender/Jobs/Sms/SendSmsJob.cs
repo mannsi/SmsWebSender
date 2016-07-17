@@ -45,7 +45,7 @@ namespace SmsWebSender.Jobs.Sms
 
         private static void SendForDay(DateTime date, IAppointmentService appointmentService, ApplicationUser sendingUser, ISmsService smsService, IConfiguration configuration, IEmailService emailService)
         {
-            var messageLinesBlocks = SmsController.GetMessageLineBlocks(date, appointmentService, sendingUser, true);
+            var messageLinesBlocks = SmsController.GetMessageLineBlocks(date, appointmentService, sendingUser, true, emailService);
 
             if (!messageLinesBlocks.Any()) return;
 

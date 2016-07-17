@@ -28,7 +28,7 @@
     },
     "Google.Apis.Calendar.v3": "1.14.0.542",
     "Quartz": "2.3.3",
-    "Sendgrid": "7.0.4",
+    "Sendgrid": "7.0.5",
     "Twilio": "4.7.2",
     "Newtonsoft.Json": "9.0.1",
     "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "1.0.0",

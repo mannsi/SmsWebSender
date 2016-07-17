@@ -48,6 +48,8 @@ namespace SmsWebSender.Services
                 var results = request.Execute().Items;
                 foreach (var result in results)
                 {
+                    if (result.Status == "cancelled" || result.Summary == null) continue;
+
                     string clientName = result.Summary;
                     var startTimeOfAppointment = DateTime.MinValue;
                     if (result.Start.DateTime.HasValue)

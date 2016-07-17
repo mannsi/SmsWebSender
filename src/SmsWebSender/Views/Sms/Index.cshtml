@@ -22,17 +22,17 @@
             <table class="table table-borderless table-striped"  ng-repeat="block in vm.messageLinesBlocks">
                 <thead>
                     <tr>
-                        <td colspan="4" class="h4">{{block.EmployeeName}}</td>
+                        <td colspan="4" class="h4">{{block.employeeName}}</td>
                         <td class="pull-right">Á að senda</td>
                     </tr>
                 </thead>
                 <tbody>
-                <tr class="text-center" ng-repeat="messageLine in block.MessageLines | orderBy:'AppointmentStartTime'">
-                    <td class="col-sm-2 text-left">{{messageLine.Name}}</td>
-                    <td class="col-sm-2"><input class="form-control" type="text" ng-model="messageLine.Number"/></td>
-                    <td class="col-sm-1">{{messageLine.AppointmentStartTime | date:'HH:mm'}}</td>
-                    <td class="col-sm-5"><textarea class="form-control" row="5" style="width: 100%;" ng-model="messageLine.Body"></textarea></td>
-                    <td class="col-sm-1 text-right"><input type="checkbox" ng-disabled="!vm.validGsmNumber(messageLine.Number)" ng-model="messageLine.ShouldBeSentTo" ng-checked="messageLine.ShouldBeSentTo && vm.validGsmNumber(messageLine.Number)"/></td>
+                <tr class="text-center" ng-repeat="messageLine in block.messageLines | orderBy:'appointmentStartTime'">
+                    <td class="col-sm-2 text-left">{{messageLine.name}}</td>
+                    <td class="col-sm-2"><input class="form-control" type="text" ng-model="messageLine.number"/></td>
+                    <td class="col-sm-1">{{messageLine.appointmentStartTime | date:'HH:mm'}}</td>
+                    <td class="col-sm-5"><textarea class="form-control" row="5" style="width: 100%;" ng-model="messageLine.body"></textarea></td>
+                    <td class="col-sm-1 text-right"><input type="checkbox" ng-disabled="!vm.validGsmNumber(messageLine.number)" ng-model="messageLine.shouldBeSentTo" ng-checked="messageLine.shouldBeSentTo && vm.validGsmNumber(messageLine.number)"/></td>
                 </tr>
                 </tbody>
             </table>

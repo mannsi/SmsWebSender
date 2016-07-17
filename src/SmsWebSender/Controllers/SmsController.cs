@@ -44,8 +44,6 @@ namespace SmsWebSender.Controllers
         [Route("")]
         public async Task<IActionResult> Index()
         {
-            return RedirectToAction("List");
-
             var userSending = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
 
             var vm = new SmsViewModel
@@ -70,7 +68,7 @@ namespace SmsWebSender.Controllers
         public async Task<JsonResult> MessageLinesBlocks(DateTime date)
         {
             var user = await _userManager.FindByIdAsync(_userManager.GetUserId(User));
-            var messageLinesBlocks = GetMessageLineBlocks(date, _appointmentService, user, false);
+            var messageLinesBlocks = GetMessageLineBlocks(date, _appointmentService, user, false, _emailService);
 
             if (messageLinesBlocks == null)
             {
@@ -81,7 +79,7 @@ namespace SmsWebSender.Controllers
             return new JsonResult(messageLinesBlocks);
         }
 
-        internal static List<MessageLinesBlock> GetMessageLineBlocks(DateTime date, IAppointmentService appointmentService, ApplicationUser user, bool onlyIncludeShouldSendLines)
+        internal static List<MessageLinesBlock> GetMessageLineBlocks(DateTime date, IAppointmentService appointmentService, ApplicationUser user, bool onlyIncludeShouldSendLines, IEmailService emailService)
         {
             List<Appointment> appointmentsForDay;
             try
@@ -90,6 +88,7 @@ namespace SmsWebSender.Controllers
             }
             catch (Exception ex)
             {
+                emailService.SendEmailAsync("gudbjorn.einarsson@gmail.com", "SMS ERROR", $"Villa við að ná í bókanir fyrir daginn. Villuskilaboð: {ex.Message}", "hyldypi@hyldypi.is", "Hyldýpi");
                 return null;
             }
             var messageLinesBlocks = new List<MessageLinesBlock>();
