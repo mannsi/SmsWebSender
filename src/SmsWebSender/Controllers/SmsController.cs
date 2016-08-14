@@ -228,6 +228,18 @@ namespace SmsWebSender.Controllers
                         "Hyldýpi");
         }
 
+        [Route("SmsHourCallback")]
+        [HttpPost]
+        public void SmsHourCallback(int hour)
+        {
+            _emailService.SendEmailAsync(
+                "gudbjorn.einarsson@gmail.com", 
+                "Sms hour callback", 
+                $"Var sent kl {hour}. Prófa hvort það virki að pinga síðuna frá einhverju random service. Ætla svo að bæta við parameters sem tekur inn kl hvað fyrirspurnin var gerð (og eitthvað security check líka)", 
+                "hyldypi@hyldypi.is",
+                "Hyldýpi");
+        }
+
         [Route("TestEmailSending")]
         public void TestEmailSending(string SmsStatus, string From, string To)
         {
